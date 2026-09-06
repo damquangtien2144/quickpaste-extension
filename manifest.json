@@ -1,0 +1,69 @@
+{
+  "manifest_version": 3,
+  "name": "QuickPaste",
+  "version": "1.0.0",
+  "description": "Tự dán văn bản vừa sao chép hoặc cắt vào một hay nhiều ô đã chọn. Ghi nhớ ô đích theo website.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "QuickPaste",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "commands": {
+    "toggle-quickpaste": {
+      "suggested_key": {
+        "default": "Alt+Shift+Q"
+      },
+      "description": "Bật/tắt QuickPaste"
+    },
+    "pick-target": {
+      "suggested_key": {
+        "default": "Alt+Shift+T"
+      },
+      "description": "Chọn ô đích QuickPaste trên tab hiện tại"
+    },
+    "cycle-target": {
+      "suggested_key": {
+        "default": "Alt+Shift+Y"
+      },
+      "description": "Chuyển sang ô đích QuickPaste tiếp theo"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "i18n.js",
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "minimum_chrome_version": "119"
+}

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QuickPaste</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="app">
+
+    <!-- ═══ HEADER BANNER ═══ -->
+    <div class="header-banner">
+      <header class="topbar">
+        <div class="brand">
+          <img src="icons/icon48.png" alt="" class="brand-icon" />
+          <div>
+            <h1>QuickPaste</h1>
+            <p data-i18n="brand.subtitle">Sao chép hoặc cắt · tự dán vào ô đã chọn</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="languageToggle" class="language-toggle" type="button" data-i18n-title="language.switch" data-i18n-aria="language.switch" title="Chuyển sang tiếng Anh" aria-label="Chuyển sang tiếng Anh">
+            <span data-language="vi">VI</span><i>/</i><span data-language="en">EN</span>
+          </button>
+        <label class="switch" data-i18n-title="master.title" title="Bật hoặc tạm dừng dán tự động">
+          <input id="enabled" type="checkbox" data-i18n-aria="master.aria" aria-label="Bật dán tự động" />
+          <span></span>
+        </label>
+        </div>
+      </header>
+      <div class="flowline" data-i18n-aria="flow.aria" aria-label="Cách dùng nhanh">
+        <span><b>1</b><span data-i18n="flow.pick">Chọn ô đích</span></span><i>→</i><span><b>2</b><span data-i18n="flow.copy">Sao chép / Cắt</span></span><i>→</i><span><b>✓</b><span data-i18n="flow.paste">Tự dán</span></span>
+      </div>
+    </div>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="content-area">
+
+      <!-- ── TARGET + QUICK ACTIONS ── -->
+      <section class="card target-card">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow" data-i18n="target.heading">Ô ĐÍCH ĐANG CHỌN</div>
+            <div class="status-row">
+              <span id="targetStatus" class="status-dot checking"></span>
+              <span id="targetStatusText" data-i18n="target.loading">Đang tải…</span>
+            </div>
+          </div>
+          <span id="targetCount" class="count-pill">0 ô đích</span>
+        </div>
+
+        <select id="targetSelect" class="target-select" data-i18n-aria="target.selectAria" aria-label="Chọn ô đích đã lưu"></select>
+        <div id="targetMeta" class="target-meta" data-i18n="target.start">Chọn một ô nhập để bắt đầu.</div>
+
+        <div class="target-actions">
+          <button id="pickTarget" class="primary" data-i18n-title="pick.title" title="Bấm nút này, rồi bấm vào ô nhập trên tab hiện tại">＋ Chọn ô đích</button>
+          <button id="focusTarget" class="icon-button" data-i18n-title="focus.title" data-i18n-aria="focus.aria" title="Đến tab chứa ô đích và đánh dấu vị trí ô" aria-label="Mở ô đích">
+            <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>
+          <button id="renameTarget" class="icon-button" data-i18n-title="rename.title" data-i18n-aria="rename.aria" title="Đặt tên dễ nhớ cho ô đích" aria-label="Đổi tên ô đích">✎</button>
+          <button id="removeTarget" class="icon-button danger-soft" data-i18n-title="remove.title" data-i18n-aria="remove.aria" title="Xóa ô đích khỏi danh sách đã lưu" aria-label="Xóa ô đích">×</button>
+        </div>
+
+        <div id="renameRow" class="rename-row" hidden>
+          <input id="renameInput" maxlength="80" data-i18n-placeholder="rename.placeholder" data-i18n-aria="rename.inputAria" placeholder="Ví dụ: Khung chat, Ô dịch…" aria-label="Tên ô đích" />
+          <button id="saveRename" class="mini primary-mini" data-i18n="common.save">Lưu</button>
+          <button id="cancelRename" class="mini" data-i18n="common.cancel">Hủy</button>
+        </div>
+
+        <div class="quick-divider"></div>
+
+        <section class="quick-grid">
+          <button id="test" class="quick-action" data-i18n-title="test.title" title="Chèn “QuickPaste ✓” vào ô đang chọn, theo cách chèn trong Cài đặt"><span>✓</span><b data-i18n="test.label">Gửi thử</b><small data-i18n="test.sub">chèn văn bản mẫu</small></button>
+          <button id="resend" class="quick-action" data-i18n-title="resend.title" title="Dán lại nội dung đã gửi gần nhất vào đúng các ô đã nhận, theo cách chèn hiện tại"><span>↻</span><b data-i18n="resend.label">Gửi lại</b><small data-i18n="resend.sub">nội dung đã gửi</small></button>
+          <button id="undo" class="quick-action" data-i18n-title="undo.title" title="Hoàn tác lần dán gần nhất trong các ô đã nhận, nếu nội dung chưa bị sửa thêm"><span>↶</span><b data-i18n="undo.label">Hoàn tác</b><small data-i18n="undo.sub">lần dán gần nhất</small></button>
+        </section>
+        <p id="quickActionHint" class="quick-note" data-i18n="quick.hint">Gửi thử chèn văn bản mẫu. Gửi lại dùng các ô đã nhận ở lần gửi trước.</p>
+
+        <!-- Connection / Reload Tip Banner -->
+        <div class="connection-tip">
+          <span class="tip-icon">💡</span>
+          <div class="tip-body">
+            <b data-i18n="reload.title">Vừa cài đặt hoặc tải lại tiện ích?</b>
+            <span data-i18n-html="reload.body">Nhấn <b>F5</b> ở tab nguồn và tab đích để áp dụng. Nếu vẫn chưa dán, hãy kiểm tra công tắc và chọn lại ô đích.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── ACTIVITY ── -->
+      <section class="card activity-card">
+        <div class="section-head compact">
+          <div class="section-title">
+            <span class="title-icon icon-activity">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span data-i18n="activity.heading">Hoạt động gần đây</span>
+          </div>
+          <span id="statsText" class="muted" data-i18n-title="activity.countTitle" title="Mỗi lần dán thành công vào một ô được tính là một lượt">0 lượt dán</span>
+        </div>
+        <div id="activity" class="activity-list"><div class="empty" data-i18n="activity.empty">Chưa có lượt dán nào. Chọn ô đích, rồi sao chép hoặc cắt văn bản để bắt đầu.</div></div>
+      </section>
+
+      <!-- ── BROADCAST (collapsible) ── -->
+      <details class="card collapsible-card broadcast-card">
+        <summary class="card-summary">
+          <div class="summary-content">
+            <div class="section-title" data-i18n="broadcast.heading">📡 Dán nhiều ô</div>
+            <small class="summary-desc" data-i18n="broadcast.summary">Một lần sao chép, gửi tới các ô đã chọn</small>
+          </div>
+          <span class="expand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </span>
+        </summary>
+        <div class="card-body broadcast-body">
+          <div class="broadcast-head">
+            <small data-i18n="broadcast.help">Bật rồi đánh dấu các ô muốn nhận. Sao chép hoặc cắt một lần để gửi.</small>
+            <label class="switch small-switch" data-i18n-title="broadcast.title" title="Bật hoặc tắt chế độ dán nhiều ô">
+              <input id="broadcastEnabled" type="checkbox" data-i18n-aria="broadcast.aria" aria-label="Bật dán nhiều ô" />
+              <span></span>
+            </label>
+          </div>
+          <div id="broadcastBody" hidden>
+            <div class="broadcast-toolbar"><span id="broadcastSummary">Đã chọn 0 ô</span><div><button id="broadcastAll" class="link-button" data-i18n="broadcast.all">Chọn tất cả</button><button id="broadcastNone" class="link-button" data-i18n="broadcast.none">Bỏ chọn tất cả</button></div></div>
+            <div id="broadcastList" class="broadcast-list"></div>
+            <div class="broadcast-note" data-i18n="broadcast.note">Gửi thử chỉ dùng ô đang chọn ở trên. Gửi lại dùng các ô đã nhận ở lần gửi trước, kể cả khi bạn đổi danh sách này.</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ── SETTINGS (merged, collapsible) ── -->
+      <details class="card collapsible-card settings-card">
+        <summary class="card-summary">
+          <div class="summary-content">
+            <div class="section-title" data-i18n="settings.heading">⚙️ Cài đặt</div>
+            <small class="summary-desc" data-i18n="settings.summary">Nguồn văn bản, cách chèn và ghi nhớ</small>
+          </div>
+          <span class="expand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </span>
+        </summary>
+        <div class="card-body settings-body">
+          <div class="settings-group">
+            <div class="group-label" data-i18n="settings.basic">Cơ bản</div>
+            <div class="field-grid">
+              <label>
+                <span data-i18n="scope.label">Lấy văn bản từ</span>
+                <select id="scope">
+                  <option value="any" data-i18n="scope.any">Mọi tab</option>
+                  <option value="same" data-i18n="scope.same">Chỉ cùng tab đích</option>
+                  <option value="cross" data-i18n="scope.cross">Chỉ khác tab đích</option>
+                </select>
+                <small class="field-hint" data-i18n="scope.hint">Áp dụng khi sao chép/cắt, xét theo từng ô đích.</small>
+              </label>
+              <label>
+                <span data-i18n="mode.label">Cách chèn</span>
+                <select id="mode">
+                  <option value="cursor" data-i18n="mode.cursor">Tại vị trí con trỏ</option>
+                  <option value="append" data-i18n="mode.append">Nối vào cuối</option>
+                  <option value="replace" data-i18n="mode.replace">Thay toàn bộ nội dung</option>
+                </select>
+                <small class="field-hint" data-i18n="mode.hint">Áp dụng cả khi Gửi thử và Gửi lại.</small>
+              </label>
+            </div>
+            <label id="separatorRow" class="full-field" hidden>
+              <span data-i18n="separator.label">Ngăn cách giữa các lần nối</span>
+              <select id="separator">
+                <option value="\n" data-i18n="separator.line">Xuống dòng</option>
+                <option value="\n\n" data-i18n="separator.blank">Một dòng trống</option>
+                <option value=" " data-i18n="separator.space">Dấu cách</option>
+                <option value="" data-i18n="separator.none">Không ngăn cách</option>
+                <option value="\t" data-i18n="separator.tab">Ký tự tab</option>
+              </select>
+            </label>
+          </div>
+          <div class="settings-group">
+            <div class="group-label" data-i18n="settings.other">Tùy chọn khác</div>
+            <label class="toggle-row">
+              <div><b data-i18n="feedback.label">Thông báo sau khi gửi</b><small data-i18n="feedback.help">Hiện kết quả tại tab nguồn khi sao chép hoặc cắt.</small></div>
+              <input id="feedback" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <div><b data-i18n="dedup.label">Chống gửi trùng</b><small data-i18n="dedup.help">Bỏ qua văn bản giống lần vừa gửi tới cùng ô trong khoảng thời gian bên dưới.</small></div>
+              <input id="preventDuplicates" type="checkbox" />
+            </label>
+            <label id="duplicateWindowRow" class="inline-setting">
+              <span data-i18n="dedup.time">Thời gian chống trùng</span>
+              <select id="duplicateWindowMs">
+                <option value="500" data-i18n="seconds.half">0,5 giây</option>
+                <option value="900" data-i18n="seconds.pointNine">0,9 giây</option>
+                <option value="1500" data-i18n="seconds.oneHalf">1,5 giây</option>
+                <option value="3000" data-i18n="seconds.three">3 giây</option>
+              </select>
+            </label>
+            <label class="toggle-row">
+              <div><b data-i18n="reconnect.label">Tự nối lại ô đích</b><small data-i18n="reconnect.help">Tìm lại ô khi bạn mở lại trang đích. Không tự mở tab mới.</small></div>
+              <input id="autoReconnect" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <div><b data-i18n="profiles.label">Nhớ ô theo website</b><small data-i18n="profiles.help">Nhớ ô chọn gần nhất trên mỗi website. Dùng khi bật tự nối lại.</small></div>
+              <input id="websiteProfilesEnabled" type="checkbox" />
+            </label>
+            <div class="profile-row"><span id="profileSummary">Đã nhớ 0 website</span><button id="clearProfiles" class="link-button danger-link" data-i18n="profiles.clear">Xóa ghi nhớ</button></div>
+            <label class="toggle-row">
+              <div><b data-i18n="replay.label">Nhớ nội dung để gửi lại</b><small data-i18n="replay.help">Giữ nội dung đã gửi gần nhất trong phiên. Xóa khi tắt tùy chọn này hoặc khởi động lại trình duyệt.</small></div>
+              <input id="rememberLastInSession" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <div><b data-i18n="trim.label">Bỏ khoảng trắng ở đầu và cuối</b><small data-i18n="trim.help">Bỏ cả dòng trống ở hai đầu. Nên tắt khi cần giữ nguyên định dạng hoặc mã nguồn.</small></div>
+              <input id="trimCopiedText" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <div><b data-i18n="oneShot.label">Dán một lần rồi tạm dừng</b><small data-i18n="oneShot.help">Sau lần sao chép/cắt có ô nhận thành công, tạm dừng tự dán. Với nhiều ô, xử lý xong cả nhóm rồi dừng.</small></div>
+              <input id="oneShot" type="checkbox" />
+            </label>
+            <button id="clearAll" class="text-danger" data-i18n="targets.clearAll">Xóa tất cả ô đích đã lưu</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- ── SHORTCUT STRIP ── -->
+      <div class="shortcut-strip">
+        <span><kbd id="shortcutPick">Alt+Shift+T</kbd><span data-i18n="shortcut.pick">chọn đích</span></span>
+        <span><kbd id="shortcutCycle">Alt+Shift+Y</kbd><span data-i18n="shortcut.cycle">đổi đích</span></span>
+        <span><kbd id="shortcutToggle">Alt+Shift+Q</kbd><span data-i18n="shortcut.toggle">bật/tắt</span></span>
+      </div>
+
+    </div><!-- /content-area -->
+
+    <!-- Toast -->
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- Footer -->
+    <footer>
+      <span data-i18n="shortcut.footer" data-i18n-title="shortcut.footerTitle" title="Có thể đổi phím tại chrome://extensions/shortcuts">Phím tắt đang dùng ở phía trên</span>
+      <span class="footer-links">
+        <button id="showGuide" class="footer-link" type="button" data-i18n="guide.button">📖 Hướng dẫn</button>
+        <span class="version">v1.0.0</span>
+      </span>
+    </footer>
+
+  </main>
+
+  <!-- ═══ SPOTLIGHT TOUR ═══ -->
+  <div id="tourOverlay" class="tour-overlay" hidden></div>
+  <div id="tourHighlight" class="tour-highlight-box" hidden></div>
+  <div id="tourTooltip" class="tour-tooltip" hidden>
+    <div class="tour-header">
+      <span id="tourCounter" class="tour-counter"></span>
+      <button id="tourClose" class="tour-close" type="button" data-i18n-title="guide.closeTitle" data-i18n-aria="guide.closeTitle" title="Đóng hướng dẫn" aria-label="Đóng hướng dẫn">×</button>
+    </div>
+    <div class="tour-progress"><span id="tourProgress"></span></div>
+    <div class="tour-body">
+      <div class="tour-title-row">
+        <span id="tourIcon" class="tour-icon"></span>
+        <h3 id="tourTitle" class="tour-title"></h3>
+      </div>
+      <p id="tourDesc" class="tour-desc"></p>
+      <div id="tourTips" class="tour-tips"></div>
+    </div>
+    <div class="tour-actions">
+      <button id="tourSkip" class="tour-skip" type="button" data-i18n="common.skip">Bỏ qua</button>
+      <span>
+        <button id="tourBack" class="tour-btn" type="button" data-i18n="guide.back">← Quay lại</button>
+        <button id="tourNext" class="tour-btn tour-btn-next" type="button" data-i18n="guide.next">Tiếp theo →</button>
+      </span>
+    </div>
+    <div id="tourArrow" class="tour-arrow"></div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="popup.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>
